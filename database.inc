@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Database interface code for MySQL database servers.
+ * Database interface code for MySQL database servers.  
  */
 
 /**
@@ -87,7 +87,7 @@ class DatabaseConnection_mysql extends DatabaseConnection {
       'init_commands' => array(),
     );
     $connection_options['init_commands'] += array(
-      'sql_mode' => "SET sql_mode = 'REAL_AS_FLOAT,PIPES_AS_CONCAT,ANSI_QUOTES,IGNORE_SPACE,STRICT_TRANS_TABLES,STRICT_ALL_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER'",
+     'sql_mode' => "SET sql_mode = 'REAL_AS_FLOAT,PIPES_AS_CONCAT,ANSI_QUOTES,IGNORE_SPACE,STRICT_TRANS_TABLES,STRICT_ALL_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO'",
     );
     // Execute initial commands.
     foreach ($connection_options['init_commands'] as $sql) {
@@ -99,6 +99,13 @@ class DatabaseConnection_mysql extends DatabaseConnection {
     if ($this->needsCleanup) {
       $this->nextIdDelete();
     }
+  }
+  public function query($query, array $args = array(), $options = array()) {
+    $query = preg_replace('/{([^}]+)}/', '`\1`', $query);
+    // This to make Drush work
+    $query = str_replace(' system.', ' `system`.', $query);
+    $query = str_replace('`system` system', '`system` `system`', $query);
+    return parent::query($query, $args, $options);
   }
 
   public function queryRange($query, $from, $count, array $args = array(), array $options = array()) {
@@ -249,7 +256,6 @@ class DatabaseConnection_mysql extends DatabaseConnection {
     return TRUE;
   }
 }
-
 
 /**
  * @} End of "addtogroup database".
